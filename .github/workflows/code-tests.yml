@@ -1,0 +1,64 @@
+name: Code Tests
+
+on: [push, pull_request]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  flake8-lint:
+    runs-on: ubuntu-latest
+    name: Flake8
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.11"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Python dependencies
+        uses: py-actions/py-dependency-install@v4
+      - name: flake8 Lint
+        uses: py-actions/flake8@v2
+        with:
+          ignore: "C901"
+          max-line-length: "200"
+          plugins: "flake8-bugbear==22.1.11"
+  pytest:
+    runs-on: ubuntu-latest
+    name: Pytest
+    strategy:
+      matrix:
+        python-version: ["3.7", "3.11"]
+    steps:
+      - name: pytest install
+        run: pip install pytest
+      - name: Test with pytest
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+  container:
+    runs-on: ubuntu-latest
+    name: Container Build
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Buildah Action
+        id: build-image
+        uses: redhat-actions/buildah-build@v2
+        with:
+          image: ${{ env.IMAGE_NAME }}
+          tags: latest ${{ github.sha }}
+          containerfiles: |
+            ./Containerfile
+  markdown:
+    runs-on: ubuntu-latest
+    name: Markdown Check
+    steps:
+    - uses: actions/checkout@master
+    - uses: gaurav-nelson/github-action-markdown-link-check@v1
