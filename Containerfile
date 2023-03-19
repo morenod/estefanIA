@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM docker.io/library/python:3.11
 MAINTAINER morenod
 
 ADD bot.py /
