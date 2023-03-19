@@ -8,13 +8,14 @@ name: Container Publish
 on:
   push:
     branches: [ "main" ]
+  release:
+    types: [created]
 
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-
 
 jobs:
   container-build:
@@ -31,7 +32,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: latest ${{ github.sha }}
+          tags: latest ${{ github.sha }} {{ env.GITHUB_REF#refs/tags/ }}
           containerfiles: |
             ./Containerfile
       - name: Log in to the GitHub Container registry
