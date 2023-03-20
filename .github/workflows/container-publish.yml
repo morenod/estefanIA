@@ -9,7 +9,7 @@ on:
   push:
     branches: [ "main" ]
   release:
-    types: [created]
+    types: [published]
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -32,7 +32,7 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: latest ${{ github.sha }} {{ env.GITHUB_REF#refs/tags/ }}
+          tags: latest ${{ github.sha }} {{ env.GITHUB_REF | replace('refs/tags/', '') }}
           containerfiles: |
             ./Containerfile
       - name: Log in to the GitHub Container registry
