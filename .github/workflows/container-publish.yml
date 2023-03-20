@@ -6,8 +6,6 @@ name: Container Publish
 # documentation.
 
 on:
-  push:
-    branches: [ "main" ]
   release:
     types: [published]
 
